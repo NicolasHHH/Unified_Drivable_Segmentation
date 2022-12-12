@@ -1,8 +1,7 @@
 # Unified Object Detection, Lane Regression and Drivable Area Segmentation.
 
 
-**Our work is developed on HybridNets.**   
-![logo](images/hybridnets.jpg)  
+**Our work is developed from HybridNets (https://github.com/datvuthanh/HybridNets)**   
 
 ## Getting Started 
 
@@ -14,7 +13,7 @@ cd HybridNets
 pip install -r requirements.txt
 ```
  
-### Demo
+### Demo - Unified Segmentation
 
 #### 1. Default: car only detection + lane line + drivable area segmentation
 ```bash
@@ -30,27 +29,32 @@ python hybridnets_test_videos.py -w weights/hybridnets.pth --source demo/video -
 # Result is saved in a new folder called demo_result
 ```
 #### 2. Custom (ours): vihecle & pedestrain detection + lane line + drivable area segmentation
+
+Download weights from google drive: https://drive.google.com/drive/folders/1kA16TJUVpswy6cb7EUVqN58J8ubLcytv?usp=sharing
+Put them under `./weights/`
+
 ```bash
-# Download custom weights
-google drive
 
 # Image inference
-python hybridnets_test.py -w weights/hybridnets.pth --source demo/image --output demo_result
+python hybridnets_test.py -w weights/xxx.pth --project bdd100k_person_car --source demo/image --output demo_result
+
 # pictures of size 1280*720 are recommended
 
 # Video inference
-python hybridnets_test_videos.py -w weights/hybridnets.pth --source demo/video --output demo_result
+python hybridnets_test_videos.py -w weights/xxx.pth --project bdd100k_person_car --source demo/video --output demo_result
 ```
 
-
-
 ## Usage
+
 ### Data Preparation
 Update your dataset paths in `projects/your_project_name.yml`.
 
 For BDD100K: [imgs](https://bdd-data.berkeley.edu/), [det_annot](https://drive.google.com/file/d/1d5osZ83rLwda7mfT3zdgljDiQO3f9B5M/view), [da_seg_annot](https://drive.google.com/file/d/1yNYLtZ5GVscx7RzpOd8hS7Mh7Rs6l3Z3/view), [ll_seg_annot](https://drive.google.com/file/d/1BPsyAjikEM9fqsVNMIygvdVVPrmK1ot-/view)
 
+For kitti Odometry, a tiny portion of data(20 frames) is provided in the ./sample folder.
+
 ### Training
+
 #### 1) Edit or create a new project configuration, using bdd100k.yml as a template. Augmentation params are here.
 
 #### 2) Train
@@ -67,6 +71,7 @@ python train.py -p bdd100k        # config filename
 Please check `python train.py --help` for cheat codes.
 
 #### 3) Evaluate
+
 ```bash
 python val.py -w checkpoints/weight.pth
 ```
@@ -74,5 +79,10 @@ python val.py -w checkpoints/weight.pth
 **Problem shooting: Validation process got killed! **
 
 - Train on a high-RAM instance (RAM as in main memory, not VRAM in GPU). For your reference, we can only val the combined `car` class with 64GB RAM.
-- Train with `python train.py --cal_map False` to not calculate metrics when validating. This option will only print validation losses. When the losses seem to flatten and the weather is nice, rent a high-RAM instance to validate the best weight with `python val.py -w checkpoints/xxx_best.pth`. We actually did this to save on cost.
-- Reduce the confidence threshold with `python train.py --conf_thres 0.5` or `python val.py --conf_thres 0.5`, depending on your application and end goals. You don't have to get best recall unless you're either helping us by experimenting :smiling_face_with_three_hearts: or competing with us :angry:.
+- Train with `python train.py --cal_map False` to not calculate metrics when validating. 
+
+### 3D Drivable Map Construction
+1) Convert the point cloud in `.bin` to `.pcd` using `kitti_bin_pcd.ipynb`
+2) Colorize point clouds using `pcd_rgb.ipynb`
+3) Visualize the result using the last bloc of pcd_rgb.ipynb`
+
