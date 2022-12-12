@@ -1,7 +1,9 @@
 # Unified Object Detection, Lane Regression and Drivable Area Segmentation.
 
+https://user-images.githubusercontent.com/57991090/207166131-9fad8c0f-1b88-4bf0-b868-6104d9721be2.mp4
 
 **Our work is developed from HybridNets (https://github.com/datvuthanh/HybridNets)**   
+
 
 ## Getting Started 
 
@@ -43,6 +45,7 @@ python hybridnets_test.py -w weights/xxx.pth --project bdd100k_person_car --sour
 # Video inference
 python hybridnets_test_videos.py -w weights/xxx.pth --project bdd100k_person_car --source demo/video --output demo_result
 ```
+![5](https://user-images.githubusercontent.com/57991090/207167221-416cab1b-478c-465d-8806-0d25bc0a5582.jpg)
 
 ## Usage
 
@@ -85,4 +88,6 @@ python val.py -w checkpoints/weight.pth
 1) Convert the point cloud in `.bin` to `.pcd` using `kitti_bin_pcd.ipynb`
 2) Colorize point clouds using `pcd_rgb.ipynb`
 3) Visualize the result using the last bloc of pcd_rgb.ipynb`
+<img width="457" alt="Road0C" src="https://user-images.githubusercontent.com/57991090/207167097-c211562e-26ca-4eff-8eda-8860082e5494.png">
+
 
