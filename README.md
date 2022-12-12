@@ -81,7 +81,7 @@ python val.py -w checkpoints/weight.pth
 - Train on a high-RAM instance (RAM as in main memory, not VRAM in GPU). For your reference, we can only val the combined `car` class with 64GB RAM.
 - Train with `python train.py --cal_map False` to not calculate metrics when validating. 
 
-### 3D Drivable Map Construction
+# 3D Drivable Map Construction
 1) Convert the point cloud in `.bin` to `.pcd` using `kitti_bin_pcd.ipynb`
 2) Colorize point clouds using `pcd_rgb.ipynb`
 3) Visualize the result using the last bloc of pcd_rgb.ipynb`
