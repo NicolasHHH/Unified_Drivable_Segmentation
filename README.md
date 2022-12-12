@@ -59,7 +59,7 @@ Update your dataset paths in `projects/your_project_name.yml`.
 
 For BDD100K: [imgs](https://bdd-data.berkeley.edu/), [det_annot](https://drive.google.com/file/d/1d5osZ83rLwda7mfT3zdgljDiQO3f9B5M/view), [da_seg_annot](https://drive.google.com/file/d/1yNYLtZ5GVscx7RzpOd8hS7Mh7Rs6l3Z3/view), [ll_seg_annot](https://drive.google.com/file/d/1BPsyAjikEM9fqsVNMIygvdVVPrmK1ot-/view)
 
-For kitti Odometry, a tiny portion of data(20 frames) is provided in the ./sample folder.
+For kitti Odometry, a tiny portion of data (10 frames) is provided in the ./sample folder.
 
 ### Training
 
