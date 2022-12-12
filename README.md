@@ -1,5 +1,10 @@
 # Unified Object Detection, Lane Regression and Drivable Area Segmentation.
 
+### Project Description
+INF573 Course Project: Unified Multi-class Object Detection, Lane line Regression and Drivable Area Detection
+Team Member:  Tianyang HUANG, Weituo DAI
+
+### Demo Video
 https://user-images.githubusercontent.com/57991090/207166131-9fad8c0f-1b88-4bf0-b868-6104d9721be2.mp4
 
 **Our work is developed from HybridNets (https://github.com/datvuthanh/HybridNets)**   
