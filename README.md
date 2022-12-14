@@ -7,7 +7,7 @@ Team Member:  Tianyang HUANG, Weituo DAI
 ### Demo Video
 https://user-images.githubusercontent.com/57991090/207166131-9fad8c0f-1b88-4bf0-b868-6104d9721be2.mp4
 
-**Our work is developed from HybridNets (https://github.com/datvuthanh/HybridNets)**   
+**Our work is developed from HybridNets (https://github.com/NicolasHHH/Unified_Drivable_Segmentation.git)**   
 
 
 ## Getting Started 
@@ -15,8 +15,8 @@ https://user-images.githubusercontent.com/57991090/207166131-9fad8c0f-1b88-4bf0-
 ### Installation
 The project was developed with [**Python>=3.7**](https://www.python.org/downloads/) and [**Pytorch>=1.10**](https://pytorch.org/get-started/locally/).
 ```bash
-git clone https://github.com/datvuthanh/HybridNets
-cd HybridNets
+git clone https://github.com/NicolasHHH/Unified_Drivable_Segmentation.git
+cd Unified_Drivable_Segmentation
 pip install -r requirements.txt
 ```
  
