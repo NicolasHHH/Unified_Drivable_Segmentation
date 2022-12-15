@@ -260,7 +260,10 @@ def train(opt):
                         reg_loss = reg_loss.mean() if not opt.freeze_det else torch.tensor(0, device="cuda")
                         seg_loss = seg_loss.mean() if not opt.freeze_seg else torch.tensor(0, device="cuda")
 
-                        loss = cls_loss + reg_loss + seg_loss
+                        loss = cls_loss * 2 + reg_loss * 1.5 + seg_loss
+                        # with we privilege the classification loss in when training as a whole (backbone+obj+seg),
+                        # because there are less instances for training within the balanced dataset
+                        # the segmentation branch will later be trained on the huge dataset while freezing the others.
                         
                     if loss == 0 or not torch.isfinite(loss):
                         continue
