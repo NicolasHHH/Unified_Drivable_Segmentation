@@ -285,8 +285,8 @@ class FocalLossSeg(_Loss):
         gamma: Optional[float] = 2.0,
         ignore_index: Optional[int] = None,
         reduction: Optional[str] = "mean",
-        normalized: bool = False,
-        reduced_threshold: Optional[float] = None,
+        normalized: bool = True,
+        reduced_threshold: Optional[float] = "sum",
     ):
         """Compute Focal loss
 
