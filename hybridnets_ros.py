@@ -60,7 +60,7 @@ class ModelNode:
         # image_np = self.bridge.imgmsg_to_cv2(image_data)
         image_np = np.frombuffer(image_data.data, dtype=np.uint8).reshape(image_data.height, image_data.width, -1)
 
-        return image_np, image_data
+        return image_np
 
     def postprocess(self, processed_image):
         # transcript back
