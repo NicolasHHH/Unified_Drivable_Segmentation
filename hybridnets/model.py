@@ -16,7 +16,8 @@ class ModelWithLoss(nn.Module):
         super().__init__()
         self.model = model
         self.criterion = FocalLoss()
-        self.seg_criterion1 = TverskyLoss(mode=self.model.seg_mode, alpha=0.7, beta=0.3, gamma=4.0/3, from_logits=True)
+        self.seg_criterion1 = TverskyLoss(mode=self.model.seg_mode, alpha=0.7, beta=0.3, gamma=4.0 / 3,
+                                          from_logits=True)
         self.seg_criterion2 = FocalLossSeg(mode=self.model.seg_mode, alpha=0.25)
         self.debug = debug
 
@@ -33,7 +34,29 @@ class ModelWithLoss(nn.Module):
             tversky_loss = self.seg_criterion1(segmentation, seg_annot)
             focal_loss = self.seg_criterion2(segmentation, seg_annot)
 
-        seg_loss = tversky_loss + 0.8 * focal_loss
+            # Visualization
+            # seg_0 = seg_annot[0]
+            # # print('bbb', seg_0.shape)
+            # seg_0 = torch.argmax(seg_0, dim = 0)
+            # # print('before', seg_0.shape)
+            # seg_0 = seg_0.cpu().numpy()
+            #     #.transpose(1, 2, 0)
+            # print(seg_0.shape)
+            #
+            # anh = np.zeros((384,640,3))
+            #
+            # anh[seg_0 == 0] = (255,0,0)
+            # anh[seg_0 == 1] = (0,255,0)
+            # anh[seg_0 == 2] = (0,0,255)
+            #
+            # anh = np.uint8(anh)
+            #
+            # cv2.imwrite('anh.jpg',anh)
+
+        seg_loss = tversky_loss + 1 * focal_loss
+        # print("TVERSKY", tversky_loss)
+        # print("FOCAL", focal_loss)
+        # seg_loss *= 50
 
         return cls_loss, reg_loss, seg_loss, regression, classification, anchors, segmentation
 
@@ -43,6 +66,11 @@ class SeparableConvBlock(nn.Module):
         super(SeparableConvBlock, self).__init__()
         if out_channels is None:
             out_channels = in_channels
+
+        # Q: whether separate conv
+        #  share bias between depthwise_conv and pointwise_conv
+        #  or just pointwise_conv apply bias.
+        # A: Confirmed, just pointwise_conv applies bias, depthwise_conv has no bias.
 
         self.depthwise_conv = Conv2dStaticSamePadding(in_channels, in_channels,
                                                       kernel_size=3, stride=1, groups=in_channels, bias=False)
@@ -394,15 +422,20 @@ class Conv3x3BNSwish(nn.Module):
 
         self.upsample = upsample
 
+        self.block = nn.Sequential(
+            Conv2dStaticSamePadding(in_channels, out_channels, kernel_size=(3, 3), stride=1, padding=1, bias=False),
+            nn.BatchNorm2d(out_channels, momentum=0.01, eps=1e-3),
+        )
+
         self.conv_sp = SeparableConvBlock(out_channels, onnx_export=False)
 
-        self.block = nn.Sequential(
-            nn.Conv2d(
-                in_channels, out_channels, (3, 3), stride=1, padding=1, bias=False
-            ),
-            nn.GroupNorm(32, out_channels),
-            nn.ReLU(inplace=True),
-        )
+        # self.block = nn.Sequential(
+        #     nn.Conv2d(
+        #         in_channels, out_channels, (3, 3), stride=1, padding=1, bias=False
+        #     ),
+        #     nn.GroupNorm(32, out_channels),
+        #     nn.ReLU(inplace=True),
+        # )
 
     def forward(self, x):
         x = self.conv_sp(self.swish(self.block(x)))
@@ -461,9 +494,9 @@ class BiFPNDecoder(nn.Module):
 
         self.seg_blocks = nn.ModuleList([
             SegmentationBlock(pyramid_channels, segmentation_channels, n_upsamples=n_upsamples)
-            for n_upsamples in [5,4, 3, 2, 1]
+            for n_upsamples in [5, 4, 3, 2, 1]
         ])
-        
+
         self.seg_p2 = SegmentationBlock(32, 64, n_upsamples=0)
 
         self.merge = MergeBlock(merge_policy)
@@ -474,12 +507,12 @@ class BiFPNDecoder(nn.Module):
         p2, p3, p4, p5, p6, p7 = inputs
 
         feature_pyramid = [seg_block(p) for seg_block, p in zip(self.seg_blocks, [p7, p6, p5, p4, p3])]
-        
-        p2 = self.seg_p2(p2)
-            
-        p3,p4,p5,p6,p7 = feature_pyramid
 
-        x = self.merge((p2,p3,p4,p5,p6,p7))
+        p2 = self.seg_p2(p2)
+
+        p3, p4, p5, p6, p7 = feature_pyramid
+
+        x = self.merge((p2, p3, p4, p5, p6, p7))
 
         x = self.dropout(x)
 
@@ -508,7 +541,7 @@ class Classifier(nn.Module):
                 feat = bn(feat)
                 feat = self.swish(feat)
             feat = self.header(feat)
-            feat = self.swish(feat)
+
             feat = feat.permute(0, 2, 3, 1)
             feat = feat.contiguous().view(feat.shape[0], feat.shape[1], feat.shape[2], self.num_anchors,
                                           self.num_classes)
@@ -517,7 +550,7 @@ class Classifier(nn.Module):
             feats.append(feat)
 
         feats = torch.cat(feats, dim=1)
-        feats = feats.sigmoid() # maps to 0, 1
+        feats = feats.sigmoid()
 
         return feats
 
@@ -611,10 +644,10 @@ class Conv2dStaticSamePadding(nn.Module):
 
     def forward(self, x):
         h, w = x.shape[-2:]
-        
+
         extra_h = (math.ceil(w / self.stride[1]) - 1) * self.stride[1] - w + self.kernel_size[1]
         extra_v = (math.ceil(h / self.stride[0]) - 1) * self.stride[0] - h + self.kernel_size[0]
-        
+
         left = extra_h // 2
         right = extra_h - left
         top = extra_v // 2
@@ -649,7 +682,7 @@ class MaxPool2dStaticSamePadding(nn.Module):
 
     def forward(self, x):
         h, w = x.shape[-2:]
-        
+
         extra_h = (math.ceil(w / self.stride[1]) - 1) * self.stride[1] - w + self.kernel_size[1]
         extra_v = (math.ceil(h / self.stride[0]) - 1) * self.stride[0] - h + self.kernel_size[0]
 
@@ -692,6 +725,7 @@ class Activation(nn.Module):
             self.activation = name(**params)
         else:
             raise ValueError('Activation should be callable/sigmoid/softmax/logsoftmax/tanh/None; got {}'.format(name))
+
     def forward(self, x):
         return self.activation(x)
 
@@ -712,11 +746,10 @@ class ClassificationHead(nn.Sequential):
             raise ValueError("Pooling should be one of ('max', 'avg'), got {}.".format(pooling))
         pool = nn.AdaptiveAvgPool2d(1) if pooling == 'avg' else nn.AdaptiveMaxPool2d(1)
         flatten = nn.Flatten()
-        # dropout = nn.Dropout(p=dropout, inplace=True) if dropout else nn.Identity()
-        bilinear = nn.Bilinear(in_channels, in_channels, classes, bias=True)
+        dropout = nn.Dropout(p=dropout, inplace=True) if dropout else nn.Identity()
         linear = nn.Linear(in_channels, classes, bias=True)
         activation = Activation(activation)
-        super().__init__(pool, flatten, nn.Identity(), bilinear, linear, activation)
+        super().__init__(pool, flatten, dropout, linear, activation)
 
 
 if __name__ == '__main__':
