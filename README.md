@@ -2,7 +2,14 @@
 
 ### Project Description
 INF573 Course Project: Unified Multi-class Object Detection, Lane line Regression and Drivable Area Detection
-Team Member:  Tianyang HUANG, Weituo DAI
+Team Member
+
+### Table of Contents
+- Demo Video
+- Getting Started
+- Trainin and Evaluate
+- 3D map generation Demo
+- Autoware Integration (New !!)
 
 ### Demo Video
 https://user-images.githubusercontent.com/57991090/207166131-9fad8c0f-1b88-4bf0-b868-6104d9721be2.mp4
@@ -95,4 +102,107 @@ python val.py -w checkpoints/weight.pth
 3) Visualize the result using the last bloc of pcd_rgb.ipynb`
 <img width="457" alt="Road0C" src="https://user-images.githubusercontent.com/57991090/207167097-c211562e-26ca-4eff-8eda-8860082e5494.png">
 
+# Autoware Integration
+
+## ROS + Pytorch 环境配置记录
+
+ros melodic + ubuntu 18.04 + cuda 11.3
+
+### 1. 安装Anaconda
+
+目前已知的支持同时import rospy 和 torch的办法.
+
+首先去官网下载安装文件，在命令行中安装
+
+```bash
+sh Anaconda3-2022.10-Linux-x86_64.sh
+# 根据提示完成安装
+```
+
+### 2.添加路径
+
+在`~/.bashrc`中注释默认开启Anaconda 环境，并且将`ros` 默认的`python2`路径添加到文件
+
+```bash
+# 添加
+export PYTHONPATH=$PYTHONPATH:/opt/ros/melodic/lib/python2.7/dist-packages
+
+# 整段注释掉
+# >>> conda initialize >>>
+# !! Contents within this block are managed by 'conda init' !!
+#__conda_setup="$('/home/hty/anaconda3/bin/conda' 'shell.bash' 'hook' 2> /dev/null)"
+#if [ $? -eq 0 ]; then
+#    eval "$__conda_setup"
+#else
+#    if [ -f "/home/hty/anaconda3/etc/profile.d/conda.sh" ]; then
+#        . "/home/hty/anaconda3/etc/profile.d/conda.sh"
+#    else
+#        export PATH="/home/hty/anaconda3/bin:$PATH"
+#    fi
+#fi
+#unset __conda_setup
+# <<< conda initialize <<<
+```
+
+这样确保了默认的python路径为ros的python。
+
+### 3. 配置anaconda虚拟环境
+
+从 terminal进入anaconda prompt，`~/anaconda3/bin/activate`  是第一步骤安装时设置的默认路径。
+
+```bash
+ xxx $: source ~/anaconda3/bin/activate
+
+# 进入成功效果如下
+(base) xxx $: 
+
+# 推出
+conda deactivate
+```
+
+创建独立的虚拟环境
+
+```bash
+(base) xxx $:  conda create -n rostorch python=3.9
+```
+
+安装pytorch 具体在官方archive中找对应的版本
+
+```bash
+conda install pytorch torchvision cudatoolkit=11.3 -c pytorch
+```
+
+通过pip安装ros依赖和其他模型相关库
+
+```bash
+pip install netifaces rospkg
+```
+
+测试
+
+```bash
+conda activate rostorch # 进入虚拟环境
+
+python # 打开python 版本应该为3.9.x
+>>> import torch
+>>> import rospy 
+>>> torch.cuda.is_available()
+
+True
+```
+
+至此环境配置完成
+
+## 运行
+
+```
+source ~/anaconda3/bin/activate
+
+conda activate rostorch
+
+# 已经开启roscore
+python hybridnets_ros.py
+```
+## 运行效果
+![hybridnets_whole](https://user-images.githubusercontent.com/57991090/211127200-a804fb85-7be6-4ca6-ad00-2ee39a47181f.png)
 
