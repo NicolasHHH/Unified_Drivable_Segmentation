@@ -31,45 +31,47 @@ parser.add_argument('--cuda', type=boolean_string, default=True)
 
 args = parser.parse_args()
 params = Params(f'/home/hty/PycharmProjects/HybridNets/projects/{args.project}.yml')
-
+project_dir = "/home/hty/PycharmProjects/HybridNets/""
 
 class ModelNode:
 
     def __init__(self):
         # Load the PyTorch model
-        self.venv = '/home/hty/PycharmProjects/HybridNets/venv/bin/python3.8'
+        # self.venv = 'project_dir/venv/bin/python3.8'
         self.model = init_model()
-        self.bridge = CvBridge()
+        # self.bridge = CvBridge()
         self.pub = rospy.Publisher("/pytorch_segment", Image, queue_size=10)
         rospy.Subscriber("/image_raw", Image, self.image_callback)
 
     def image_callback(self, data):
-        # print("callback")
+
         start_time = time.perf_counter()
-        image, image_data = self.preprocess(data)
-        # print(data.data, type(data.data))
+        image = self.preprocess(data)
         result = process_image(self.model, image)
-        print(result.shape)
-        output = self.postprocess(result, image_data)
+        output = self.postprocess(result)
         self.pub.publish(output)
         end_time = time.perf_counter()
-        print("callback time: ", (end_time - start_time)*1000, " ms")
+        print("callback time: ", (end_time - start_time) * 1000, " ms")
         return
 
     def preprocess(self, image_data):
         # transcript sensorImage to appropriate type
+
         # image_np = self.bridge.imgmsg_to_cv2(image_data)
         image_np = np.frombuffer(image_data.data, dtype=np.uint8).reshape(image_data.height, image_data.width, -1)
+
         return image_np, image_data
 
-    def postprocess(self, processed_image, image_data):
+    def postprocess(self, processed_image):
         # transcript back
+
         # image_msg = self.bridge.cv2_to_imgmsg(processed_image, encoding="bgr8")
         img_msg = Image()
         (img_msg.width, img_msg.height) = (1280, 720)
         img_msg.encoding = "bgr8"
         img_msg.step = img_msg.width*3
         img_msg.data = processed_image.tostring()
+
         return img_msg
 
 
@@ -105,13 +107,14 @@ def init_model():
 def process_image(model_bytes=None, image=None):
     # 模拟输入， 实际输入由外部传入
     if image is None:
-        image = cv2.imread("/home/hty/PycharmProjects/HybridNets/demo/image/4.jpg",
+        image = cv2.imread("project_dir/demo/image/4.jpg",
                            cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
-        print("read image from local")
+        print("Read image from local files")
 
+    # TODO:  把时间测算写成装饰器
     start_time = time.perf_counter()
     if model_bytes is None:
-        print("model_bytes is None, load from local.")
+        print("Load model from local.")
         with open('/home/hty/model.pkl', 'rb') as f:
             model_bytes = pickle.load(f)
         model = pickle.loads(model_bytes)
@@ -126,9 +129,9 @@ def process_image(model_bytes=None, image=None):
     shapes = []
     input_imgs = []
     obj_list = params.obj_list
-    threshold = args.conf_thresh # for detection
+    threshold = args.conf_thresh  # for detection
     iou_threshold = args.iou_thresh
-    color_list = standard_to_bgr(STANDARD_COLORS) # transform to list of 3-tuples
+    color_list = standard_to_bgr(STANDARD_COLORS)  # transform to list of 3-tuples
 
     # 初始化原始图像列表，转换颜色，调整大小
     ori_imgs = [image]
@@ -148,7 +151,7 @@ def process_image(model_bytes=None, image=None):
     ])
 
     for ori_img in ori_imgs:
-        # redundant ?
+        # TODO： 可以优化 是否冗余 ？ redundant ?
         h0, w0 = ori_img.shape[:2] # h, w, c
         r = resized_shape / max(h0, w0)  # resize image to img_size
         input_img = cv2.resize(ori_img, (int(w0 * r), int(h0 * r)), interpolation=cv2.INTER_AREA)
@@ -158,7 +161,7 @@ def process_image(model_bytes=None, image=None):
         (input_img, _), ratio, pad = letterbox((input_img, None), resized_shape, auto=True, scaleup=False)
         input_imgs.append(input_img)
 
-        # 用于还原 ？
+        # 用于还原
         shapes.append(((h0, w0), ((h / h0, w / w0), pad)))
 
     if use_cuda:
@@ -205,7 +208,7 @@ def process_image(model_bytes=None, image=None):
                 plot_one_box(ori_imgs[i], [x1, y1, x2, y2], label=obj, score=score,
                              color=color_list[get_index_label(obj, obj_list)])
 
-    # cv2.imwrite('/home/hty/PycharmProjects/HybridNets/ros.jpg', cv2.cvtColor(ori_imgs[0], cv2.COLOR_RGB2BGR))
+    # cv2.imwrite(project_dir + 'ros.jpg', cv2.cvtColor(ori_imgs[0], cv2.COLOR_RGB2BGR))
     return ori_imgs[0]
 
 
