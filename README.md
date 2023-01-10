@@ -42,7 +42,7 @@ python hybridnets_test_videos.py -w weights/hybridnets.pth --source demo/video -
 
 # Result is saved in a new folder called demo_result
 ```
-#### 2. Custom (ours): vihecle & pedestrain detection + lane line + drivable area segmentation
+#### 2. Custom (ours): vehicle & pedestrain detection + lane line + drivable area segmentation
 
 Download weights from google drive: https://drive.google.com/drive/folders/1kA16TJUVpswy6cb7EUVqN58J8ubLcytv?usp=sharing
 Put them under `./weights/`
