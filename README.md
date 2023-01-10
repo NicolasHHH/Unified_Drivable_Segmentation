@@ -199,9 +199,23 @@ True
 source ~/anaconda3/bin/activate
 
 conda activate rostorch
+```
 
-# 已经开启roscore
+### 默认配置（仅检测车辆[卡车，自行车，轿车，公交车均归类为car]）
+
+```bash
+# 已经开启roscore，且已下载hybridnets.pth 见上文“1. Default: car only ..."
 python hybridnets_ros.py
+```
+
+### 自定义配置（汽车+行人，精度提高，对暗处和小物体检测回收率提高，）
+
+Download weights from google drive: https://drive.google.com/drive/folders/1kA16TJUVpswy6cb7EUVqN58J8ubLcytv?usp=sharing
+Put them under `./weights/`
+
+```bash
+# 已经开启roscore
+python hybridnets_ros.py -w weights/xxx.pth --project bdd100k_person_car 
 ```
 ## 运行效果
 ![hybridnets_whole](https://user-images.githubusercontent.com/57991090/211127200-a804fb85-7be6-4ca6-ad00-2ee39a47181f.png)
